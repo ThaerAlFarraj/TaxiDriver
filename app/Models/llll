@@ -1,0 +1,108 @@
+try{
+        $validator = Validator::make($request->all(),[
+         'name'=> 'required|min:2|max:100',
+         'email'=>'required|email',
+         'gender'=>'required',
+         'image'=>'nullable|image',
+         'typeofcar'=>'required',
+         'number'=>'required|numeric'
+        ]);
+        if ($validator->fails())
+        {
+    $error = $validator->errors()->all()[0];
+    //$driver->save();
+    return response()->json(['status'=>'false','message'=>$error,'data'=>[]],422);
+    if( $request->driver_id != Auth::id())
+   {
+       return $this->sendError('you dont have rights', $errormessage);
+    }
+        }else{
+
+
+                $driver = Driver::where('id', $driver_id)->first();
+            $driver->name = $request->name;
+            $driver->email = $request->email;
+            $driver->gender = $request->gender;
+            $driver->typeofcar = $request->typeofcar;
+            $driver->number = $request->number;
+            $driver->password=$request->password;
+
+
+            if ($request->image && $request->image->isValid()){
+
+            $file_extension = $request->image->extension();
+            $file_name = time() . '.' . $file_extension;
+            $request->image->move(public_path('images/drivers'), $file_name);
+            $path = "public/images/drivers/$file_name";
+            $driver->image = $path;
+        }
+
+       // $driver->update();
+        return response()->json(['status'=>'true','message'=>"Profile Updated",'data'=>$driver ]);
+//$driver->update();
+
+        }
+      //  $driver->update();
+   } catch(\Exception $e){
+    return response()->json(['status'=>'false','message'=>$e->getMessage(),'data'=>[]],500);
+   }
+
+}
+public function updateprofile( Request $request)
+    {
+try{
+    $input = $request->all();
+    $id = $request->id;
+    $driver = Driver::find($id);
+        $validator = Validator::make($input,[
+         'name'=> 'string',
+         'email'=>'string|email|unique:_drivers',
+         'gender'=>'string',
+         'image'=>'nullable|image',
+         'typeofcar'=>'string',
+         'number'=>'string|numeric'
+        ]);
+        if ($validator->fails())
+        {
+    $error = $validator->errors()->all()[0];
+
+    return response()->json(['status'=>'false','message'=>$error,'data'=>[]],422);
+
+        }
+
+           if($request->exists('name')){
+            $driver->name= $input['name'];
+           }
+           if($request->exists('email')){
+            $driver->name= $input['email'];
+           }
+           if($request->exists('gender')){
+            $driver->name= $input['gender'];
+           }
+           if($request->exists('typeofcar')){
+            $driver->name= $input['typeofcar'];
+           }
+           if($request->exists('number')){
+            $driver->name= $input['number'];
+           }
+
+
+            if ($request->image && $request->image->isValid()){
+
+            $file_extension = $request->image->extension();
+            $file_name = time() . '.' . $file_extension;
+            $request->image->move(public_path('images/drivers'), $file_name);
+            $path = "public/images/drivers/$file_name";
+            $driver->image = $path;
+        }
+
+        $driver->save();
+        return response()->json(['status'=>'true','message'=>"Profile Updated",'data'=>$driver ]);
+
+        }
+
+    catch(\Exception $e){
+    return response()->json(['status'=>'false','message'=>$e->getMessage(),'data'=>[]],500);
+   }
+
+}
